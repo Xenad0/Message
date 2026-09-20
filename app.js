@@ -2,6 +2,7 @@ const fallbackSettings = {
   solution: ["1", "2", "3", "4", "5", "6", "7"],
   video: "Loesung.mp4",
   audioExtension: "m4a",
+  sequenceOverlapMs: 500,
   sounds: ["1", "2", "3", "4", "5", "6", "7"]
 };
 
@@ -99,6 +100,10 @@ async function playSequence() {
       currentAudio = audio;
       audio.addEventListener("ended", resolve, { once: true });
       audio.addEventListener("error", resolve, { once: true });
+      audio.addEventListener("loadedmetadata", () => {
+        const nextSoundAt = Math.max(0, (audio.duration * 1000) - settings.sequenceOverlapMs);
+        window.setTimeout(resolve, nextSoundAt);
+      }, { once: true });
       audio.play().catch(resolve);
     });
   }
@@ -107,16 +112,20 @@ async function playSequence() {
 document.querySelector("#activate-button").addEventListener("click", async () => {
   if (!selected.length) return setStatus("Füge zuerst mindestens einen Katzenruf hinzu.", "error");
   const correct = selected.length === settings.solution.length && selected.every((sound, i) => sound === String(settings.solution[i]));
-  if (!correct) { reward.hidden = true; setStatus("Die Runen bleiben stumm. Die Reihenfolge ist nicht korrekt.", "error"); return; }
   const sendButton = document.querySelector("#activate-button");
   sendButton.disabled = true;
+  reward.hidden = true;
   setStatus("Die Nachricht wird übermittelt …", "");
   await playSequence();
-  reward.hidden = false;
-  setStatus("Die Nachricht wurde übermittelt!", "success");
-  reward.scrollIntoView({ behavior: "smooth", block: "center" });
-  video.currentTime = 0;
-  video.play().catch(() => setStatus("Die Nachricht ist bereit. Starte das Video mit dem Abspielsymbol.", "success"));
+  if (correct) {
+    reward.hidden = false;
+    setStatus("Die Nachricht wurde übermittelt!", "success");
+    reward.scrollIntoView({ behavior: "smooth", block: "center" });
+    video.currentTime = 0;
+    video.play().catch(() => setStatus("Die Nachricht ist bereit. Starte das Video mit dem Abspielsymbol.", "success"));
+  } else {
+    setStatus("Übermittlung fehlgeschlagen.", "error");
+  }
   sendButton.disabled = false;
 });
 
