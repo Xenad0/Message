@@ -33,20 +33,21 @@ async function loadSettings() {
 
 function renderSounds() {
   buttons.innerHTML = "";
-  settings.sounds.forEach((sound) => {
+  settings.sounds.forEach((sound, index) => {
+    const catNumber = index + 1;
     const card = document.createElement("div");
     card.className = "sound-card";
     const playButton = document.createElement("button");
     playButton.type = "button";
     playButton.className = "play-button";
-    playButton.setAttribute("aria-label", `Klang ${sound} abspielen`);
+    playButton.setAttribute("aria-label", `Katzengeräusch ${catNumber} abspielen`);
     playButton.innerHTML = '<span aria-hidden="true">▶</span><span>Abspielen</span>';
     playButton.addEventListener("click", () => playSound(sound, playButton));
     const selectButton = document.createElement("button");
     selectButton.type = "button";
     selectButton.className = "sound-button";
-    selectButton.textContent = `Katze ${sound} hinzufügen`;
-    selectButton.addEventListener("click", () => chooseSound(sound));
+    selectButton.textContent = `Katze ${catNumber} hinzufügen`;
+    selectButton.addEventListener("click", () => chooseSound(sound, catNumber, playButton));
     card.append(playButton, selectButton);
     buttons.append(card);
   });
@@ -60,24 +61,26 @@ function playSound(sound, button) {
   button.classList.add("is-playing");
 }
 
-function chooseSound(sound) {
+function chooseSound(sound, catNumber, playButton) {
+  playSound(sound, playButton);
   selected.push(sound);
   reward.hidden = true;
   renderSequence();
-  setStatus(`Katze ${sound} wurde deiner Nachricht hinzugefügt.`, "");
+  setStatus(`Katze ${catNumber} wurde deiner Nachricht hinzugefügt.`, "");
 }
 
 function renderSequence() {
   sequenceList.innerHTML = "";
   emptyState.hidden = selected.length > 0;
   selected.forEach((sound, index) => {
+    const catNumber = settings.sounds.indexOf(sound) + 1;
     const item = document.createElement("li");
-    item.append(`Katze ${sound} `);
+    item.append(`Katze ${catNumber} `);
     const remove = document.createElement("button");
     remove.className = "remove-choice";
     remove.type = "button";
     remove.title = "Diesen Ruf entfernen";
-    remove.setAttribute("aria-label", `Katze ${sound} entfernen`);
+    remove.setAttribute("aria-label", `Katze ${catNumber} entfernen`);
     remove.textContent = "×";
     remove.addEventListener("click", () => { selected.splice(index, 1); renderSequence(); });
     item.append(remove);
@@ -88,11 +91,33 @@ function renderSequence() {
 function setStatus(message, type) { status.textContent = message; status.className = `status ${type}`; }
 
 document.querySelector("#clear-button").addEventListener("click", () => { selected = []; reward.hidden = true; renderSequence(); setStatus("Die Nachricht wurde verworfen.", ""); });
-document.querySelector("#activate-button").addEventListener("click", () => {
+async function playSequence() {
+  if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+  for (const sound of selected) {
+    await new Promise((resolve) => {
+      const audio = new Audio(`content/audio/${sound}.${settings.audioExtension}`);
+      currentAudio = audio;
+      audio.addEventListener("ended", resolve, { once: true });
+      audio.addEventListener("error", resolve, { once: true });
+      audio.play().catch(resolve);
+    });
+  }
+}
+
+document.querySelector("#activate-button").addEventListener("click", async () => {
   if (!selected.length) return setStatus("Füge zuerst mindestens einen Katzenruf hinzu.", "error");
   const correct = selected.length === settings.solution.length && selected.every((sound, i) => sound === String(settings.solution[i]));
-  if (correct) { reward.hidden = false; setStatus("Das Siegel bricht — die Nachricht ist offenbart!", "success"); reward.scrollIntoView({ behavior: "smooth", block: "center" }); }
-  else { reward.hidden = true; setStatus("Die Runen bleiben stumm. Die Reihenfolge ist nicht korrekt.", "error"); }
+  if (!correct) { reward.hidden = true; setStatus("Die Runen bleiben stumm. Die Reihenfolge ist nicht korrekt.", "error"); return; }
+  const sendButton = document.querySelector("#activate-button");
+  sendButton.disabled = true;
+  setStatus("Die Nachricht wird übermittelt …", "");
+  await playSequence();
+  reward.hidden = false;
+  setStatus("Die Nachricht wurde übermittelt!", "success");
+  reward.scrollIntoView({ behavior: "smooth", block: "center" });
+  video.currentTime = 0;
+  video.play().catch(() => setStatus("Die Nachricht ist bereit. Starte das Video mit dem Abspielsymbol.", "success"));
+  sendButton.disabled = false;
 });
 
 loadSettings();
