@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Message — Das Katzenorakel</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="masthead">
+        <p class="eyebrow">Ein verschlüsseltes Schreiben</p>
+        <h1>Message</h1>
+        <p class="subtitle">Das Katzenorakel</p>
+      </header>
+
+      <section class="parchment" aria-labelledby="quest-title">
+        <div class="wax-seal" aria-hidden="true">✦</div>
+        <h2 id="quest-title">Übermittle die Nachricht</h2>
+        <p class="intro">Gib die Nachricht der Katze ein, welche die übermitteln möchtest, damit du Kontakt aufnehmen kannst.</p>
+
+        <div class="game-grid">
+          <section class="sound-panel" aria-labelledby="sounds-title">
+            <h3 id="sounds-title">Die Rufe</h3>
+            <div id="sound-buttons" class="sound-buttons" aria-live="polite"></div>
+          </section>
+
+          <section class="sequence-panel" aria-labelledby="sequence-title">
+            <h3 id="sequence-title">Deine Nachricht</h3>
+            <ol id="sequence-list" class="sequence-list" aria-label="Ausgewählte Katzengeräusche"></ol>
+            <p id="empty-state" class="empty-state">Noch kein Ruf gewählt.</p>
+            <div class="controls">
+              <button id="clear-button" class="text-button" type="button">Zurücksetzen</button>
+              <button id="activate-button" class="activate-button" type="button">Aktivieren <span>❯</span></button>
+            </div>
+          </section>
+        </div>
+
+        <p id="status" class="status" role="status" aria-live="polite">Wähle einen Katzenruf, um zu beginnen.</p>
+
+        <section id="reward" class="reward" hidden aria-labelledby="reward-title">
+          <p class="chapter">Das Siegel ist gebrochen</p>
+          <h2 id="reward-title">Die Nachricht</h2>
+          <video id="solution-video" controls playsinline preload="metadata">
+            Dein Browser unterstützt das Videoformat nicht.
+          </video>
+        </section>
+      </section>
+      <footer>✦ &nbsp; Ein Rätsel aus Tinte, Pfoten und Mondlicht &nbsp; ✦</footer>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
