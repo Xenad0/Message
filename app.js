@@ -3,6 +3,7 @@ const fallbackSettings = {
   video: "Loesung.mp4",
   audioExtension: "m4a",
   sequenceOverlapMs: 500,
+  soundsCsv: "sounds.csv",
   sounds: ["1", "2", "3", "4", "5", "6", "7"]
 };
 
@@ -24,12 +25,35 @@ async function loadSettings() {
     const config = await response.json();
     if (!Array.isArray(config.solution) || !config.solution.length) throw new Error("In settings.json fehlt eine gültige Lösung.");
     settings = { ...fallbackSettings, ...config };
+    // Die explizite Reihenfolge in settings.json ist maßgeblich. Eine CSV dient nur als Fallback.
+    if (!Array.isArray(config.sounds) || !config.sounds.length) await loadSoundOrderFromCsv();
   } catch (error) {
     console.warn(error);
     setStatus("Die Standardbeschwörung wird verwendet.", "");
   }
   renderSounds();
   video.src = `content/video/${settings.video}`;
+}
+
+async function loadSoundOrderFromCsv() {
+  if (!settings.soundsCsv) return;
+  try {
+    const response = await fetch(`content/${settings.soundsCsv}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Die CSV-Datei konnte nicht geladen werden.");
+    const rows = (await response.text())
+      .replace(/^\uFEFF/, "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith("#"));
+    const values = rows
+      .map((line) => line.split(/[;,\t]/)[0].trim().replace(/\.(mp3|m4a|wav|ogg)$/i, ""))
+      .filter((value) => value && !/^(sound|audio|datei|filename)$/i.test(value));
+    if (!values.length) throw new Error("Die CSV-Datei enthält keine Sounds.");
+    settings.sounds = values;
+  } catch (error) {
+    console.warn(error);
+    setStatus("Die Sound-Reihenfolge aus der CSV konnte nicht geladen werden.", "error");
+  }
 }
 
 function renderSounds() {
