@@ -13,10 +13,6 @@ Statisches Katzenrätsel im DnD-Stil. Über `content/settings.json` lässt sich 
 
 `solution` enthält die Dateinamen der Geräusche **ohne Dateiendung**, in genau der gewünschten Reihenfolge. `video` ist der Dateiname unter `content/video`.
 
-Die Reihenfolge unter `sounds` bestimmt die Nummer der Katzen in der Oberfläche: Der erste Eintrag ist Katze 1, der zweite Katze 2 usw. Mit `audioExtension` wird das Audioformat definiert.
-
-Ist `soundsCsv` gesetzt, wird stattdessen `content/sounds.csv` verwendet. Jeder nicht-leere Eintrag definiert einen Sound; die Zeilenreihenfolge wird unverändert als Reihenfolge der Katzenbuttons übernommen. Die Überschrift `sound` ist optional.
-
-`sequenceOverlapMs` bestimmt, wie viele Millisekunden vor dem Ende eines Katzengeräuschs der nächste Ton bei der Übermittlung beginnt. Der Wert `500` halbiert die hörbare Pause zwischen den neuen Audios.
+Die Reihenfolge unter `sounds` bestimmt die Nummer der Katzen in der Oberfläche: Der erste Eintrag ist Katze 1, der zweite Katze 2 usw. Mit `audioExtension` wird das Audioformat definiert. Die Übermittlung spielt jeden Ton vollständig zu Ende, bevor der nächste beginnt. Dadurch bleiben die natürlichen, unterschiedlich langen Pausen der einzelnen Aufnahmen erhalten.
 
 Zum lokalen Testen muss die Seite über einen kleinen Webserver geöffnet werden, z. B. mit `npx serve .`, da Browser eine JSON-Datei bei einem direkten `file:///`-Aufruf häufig nicht laden dürfen.

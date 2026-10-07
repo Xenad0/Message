@@ -1,10 +1,10 @@
 const fallbackSettings = {
-  solution: ["1", "2", "3", "4", "5", "6", "7"],
+  // Dieser Fallback ermöglicht die direkte lokale Nutzung über file:///.
+  // Er entspricht der ausgelieferten settings.json, falls der Browser JSON-Dateien lokal sperrt.
+  solution: ["E", "FIS", "G", "G", "G", "E", "H", "A"],
   video: "Loesung.mp4",
-  audioExtension: "m4a",
-  sequenceOverlapMs: 500,
-  soundsCsv: "sounds.csv",
-  sounds: ["1", "2", "3", "4", "5", "6", "7"]
+  audioExtension: "mp3",
+  sounds: ["E", "FIS", "G", "A", "H"]
 };
 
 let settings = fallbackSettings;
@@ -25,35 +25,13 @@ async function loadSettings() {
     const config = await response.json();
     if (!Array.isArray(config.solution) || !config.solution.length) throw new Error("In settings.json fehlt eine gültige Lösung.");
     settings = { ...fallbackSettings, ...config };
-    // Die explizite Reihenfolge in settings.json ist maßgeblich. Eine CSV dient nur als Fallback.
-    if (!Array.isArray(config.sounds) || !config.sounds.length) await loadSoundOrderFromCsv();
+    if (!Array.isArray(settings.sounds) || !settings.sounds.length) throw new Error("In settings.json fehlen die Sounds.");
   } catch (error) {
     console.warn(error);
-    setStatus("Die Standardbeschwörung wird verwendet.", "");
+    setStatus("Die lokale Klangkonfiguration wird verwendet.", "");
   }
   renderSounds();
   video.src = `content/video/${settings.video}`;
-}
-
-async function loadSoundOrderFromCsv() {
-  if (!settings.soundsCsv) return;
-  try {
-    const response = await fetch(`content/${settings.soundsCsv}`, { cache: "no-store" });
-    if (!response.ok) throw new Error("Die CSV-Datei konnte nicht geladen werden.");
-    const rows = (await response.text())
-      .replace(/^\uFEFF/, "")
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith("#"));
-    const values = rows
-      .map((line) => line.split(/[;,\t]/)[0].trim().replace(/\.(mp3|m4a|wav|ogg)$/i, ""))
-      .filter((value) => value && !/^(sound|audio|datei|filename)$/i.test(value));
-    if (!values.length) throw new Error("Die CSV-Datei enthält keine Sounds.");
-    settings.sounds = values;
-  } catch (error) {
-    console.warn(error);
-    setStatus("Die Sound-Reihenfolge aus der CSV konnte nicht geladen werden.", "error");
-  }
 }
 
 function renderSounds() {
@@ -71,11 +49,23 @@ function renderSounds() {
     const selectButton = document.createElement("button");
     selectButton.type = "button";
     selectButton.className = "sound-button";
-    selectButton.textContent = `Katze ${catNumber} hinzufügen`;
+    selectButton.setAttribute("aria-label", `Katze ${catNumber} zur Nachricht hinzufügen`);
+    selectButton.append(createCatIcon(catNumber), document.createTextNode("Hinzufügen"));
     selectButton.addEventListener("click", () => chooseSound(sound, catNumber, playButton));
     card.append(playButton, selectButton);
     buttons.append(card);
   });
+}
+
+function createCatIcon(catNumber) {
+  const icon = document.createElement("span");
+  icon.className = `cat-icon cat-${catNumber}`;
+  icon.setAttribute("aria-hidden", "true");
+  icon.innerHTML = `<svg viewBox="0 0 24 24" focusable="false">
+    <path d="M5 19V8l4-4 3 4 3-4 4 4v11" />
+    <path d="M8 13h2m4 0h2M12 12v6m-3 1h6" />
+  </svg>`;
+  return icon;
 }
 
 function playSound(sound, button) {
@@ -91,7 +81,7 @@ function chooseSound(sound, catNumber, playButton) {
   selected.push(sound);
   reward.hidden = true;
   renderSequence();
-  setStatus(`Katze ${catNumber} wurde deiner Nachricht hinzugefügt.`, "");
+  setStatus("Eine Katze wurde deiner Nachricht hinzugefügt.", "");
 }
 
 function renderSequence() {
@@ -100,12 +90,12 @@ function renderSequence() {
   selected.forEach((sound, index) => {
     const catNumber = settings.sounds.indexOf(sound) + 1;
     const item = document.createElement("li");
-    item.append(`Katze ${catNumber} `);
+    item.append(createCatIcon(catNumber));
     const remove = document.createElement("button");
     remove.className = "remove-choice";
     remove.type = "button";
     remove.title = "Diesen Ruf entfernen";
-    remove.setAttribute("aria-label", `Katze ${catNumber} entfernen`);
+    remove.setAttribute("aria-label", "Katze aus der Nachricht entfernen");
     remove.textContent = "×";
     remove.addEventListener("click", () => { selected.splice(index, 1); renderSequence(); });
     item.append(remove);
@@ -124,10 +114,6 @@ async function playSequence() {
       currentAudio = audio;
       audio.addEventListener("ended", resolve, { once: true });
       audio.addEventListener("error", resolve, { once: true });
-      audio.addEventListener("loadedmetadata", () => {
-        const nextSoundAt = Math.max(0, (audio.duration * 1000) - settings.sequenceOverlapMs);
-        window.setTimeout(resolve, nextSoundAt);
-      }, { once: true });
       audio.play().catch(resolve);
     });
   }
