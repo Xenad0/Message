@@ -23,3 +23,14 @@ h3 { margin:0 0 18px; color:#461917; font:600 1rem Cinzel,serif; letter-spacing:
 .status { min-height:1.35em; margin:25px 0 0; font-size:1.1rem; font-style:italic; text-align:center; }.status.success { color:#397039; font-weight:bold; }.status.error { color:#8d2923; font-weight:bold; }.reward { margin-top:32px; padding-top:30px; border-top:1px solid #9b7943; text-align:center; }.reward h2 { color:#461917; }.reward video { width:100%; border:7px solid #513522; outline:1px solid var(--gold); box-shadow:0 6px 16px #2c1e1380; background:#180f0e; }footer { padding-top:20px; color:#c9a669; font-size:.78rem; text-align:center; letter-spacing:.06em; }
 .song-page { background:radial-gradient(ellipse at 50% 0%,#403554 0%,#211b32 45%,#0d0b16 100%); }.song-parchment { min-height:490px; overflow:hidden; text-align:center; background:radial-gradient(circle at 50% 22%,#f2e5bf 0,transparent 13%),linear-gradient(110deg,rgba(91,60,115,.18),transparent 30%,rgba(54,80,123,.15) 88%),var(--paper); }.song-parchment::before,.song-parchment::after { color:#77538c; }.moon-mark { margin:18px 0 16px; color:#74508a; font-size:2rem; letter-spacing:.4em; }.song-intro { max-width:340px; margin:0 auto 32px; font-size:1.25rem; font-style:italic; line-height:1.35; }.audio-altar { display:flex; align-items:center; justify-content:center; gap:12px; max-width:490px; padding:20px 10px; margin:0 auto; border-top:1px solid #9e7aaa; border-bottom:1px solid #9e7aaa; }.audio-altar audio { width:min(100%,330px); }.rune { color:#6a4380; font-size:1.6rem; }.song-note { margin:33px auto 25px; font-size:1.1rem; font-style:italic; }
 @media (min-width:650px) { .game-shell { max-width:950px; padding:40px 16px 28px; }.parchment { padding:clamp(40px,6vw,60px); }.wax-seal { right:clamp(18px,7vw,62px); }.game-grid { grid-template-columns:1.16fr .84fr; }.sound-panel,.sequence-panel { padding:25px; }.sequence-panel { border-top:0; border-left:1px solid #9b7943; }.controls { flex-direction:row; justify-content:space-between; align-items:center; }.activate-button,.text-button { min-height:auto; } }
+@media (max-width:649px) {
+	.song-shell { padding:18px 12px 16px; }
+	.song-page h1 { font-size:1.7rem; line-height:1.1; letter-spacing:0; }
+	.song-page .subtitle { font-size:1rem; }
+	.song-parchment { min-height:0; padding:36px 16px 24px; }
+	.song-intro { margin-bottom:22px; font-size:1.1rem; }
+	.audio-altar { flex-direction:column; gap:8px; padding:14px 0; }
+	.audio-altar audio { display:block; width:100%; max-width:100%; }
+	.song-note { margin:22px auto 12px; }
+	.song-shell footer { padding:16px 8px 0; line-height:1.5; }
+}
