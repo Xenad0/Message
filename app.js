@@ -3,7 +3,7 @@ const fallbackSettings = {
   // Er entspricht der ausgelieferten settings.json, falls der Browser JSON-Dateien lokal sperrt.
   solution: ["E", "FIS", "G", "G", "G", "E", "H", "A"],
   video: "Loesung.mp4",
-  audioExtension: "mp3",
+  audioExtension: "m4a",
   sounds: ["E", "FIS", "G", "A", "H"]
 };
 
@@ -108,10 +108,12 @@ function setStatus(message, type) { status.textContent = message; status.classNa
 document.querySelector("#clear-button").addEventListener("click", () => { selected = []; reward.hidden = true; renderSequence(); setStatus("Die Nachricht wurde verworfen.", ""); });
 async function playSequence() {
   if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
-  for (const sound of selected) {
+  for (const [index, sound] of selected.entries()) {
     await new Promise((resolve) => {
       const audio = new Audio(`content/audio/${sound}.${settings.audioExtension}`);
       currentAudio = audio;
+      const isFirstOrLast = index === 0 || index === selected.length - 1;
+      audio.playbackRate = isFirstOrLast || index === 2 ? 1 : index <= 2 ? 1.5 : 1.8;
       audio.addEventListener("ended", resolve, { once: true });
       audio.addEventListener("error", resolve, { once: true });
       audio.play().catch(resolve);
